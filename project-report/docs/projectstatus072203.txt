@@ -1,0 +1,318 @@
+Modernizing the Dark Ages Talker Project
+CS690 Graduate Project
+Jeffrey K. Brown
+7/22/03
+
+	This document will describe the amount of progress made this far into the
+project.  While I have not started on all aspects of the project at this point in
+time, I believe that I am mostly on schedule for having the system complete and
+ready to go by September 1st.
+
+	First, I want to list the sources of Project information:
+
+1. The Project Weblog is stored at http://jkb.tdf.ca/weblog
+2. The Talker Server can be accessed via telnet://jkb.tdf.ca:2122
+3. The Talker Chatlet Client is at http://jkb.tdf.ca/weblog/chatlet
+
+	Next, I will review the tentative project schedule.
+
+1. Model the data in the system
+
+	There are several types of data in the system:
+	1. Users - These objects represent the user connected to the system. The
+		UserConnection object represents the individual user data.  First
+		the UserConnection keeps track of the socket the user is
+		connected to.  The user also authenticates to the system through
+		the database connection, so username and password are also stored
+		in the object.  The UserConnections are stored in an array, so
+		in order to communicate between users, each UserConnection object
+		stores its own index in the array.  The UserConnection also
+		stores the amount of time and idle time of the user.  This is
+		used by the TalkerTimer class to disconnect users from the system
+		if a "connection drop" is discovered.  The TalkerTimer attempts
+		to conserve resources by deleting the objects.
+
+	2. Rooms - These objects are used to represent different areas for users
+		to communicate.  Like the Users, the Area objects store an index
+		in a main array.  In addition, each room has a description, which
+		is used to create an atmosphere for the users.  Additionally, the
+		areas are sometimes used for particular discussions, so each room
+		has an optional topic that can be set.  Rooms also have a message
+		board for leaving offline messages.  I'll cover that in the next
+		data section.  Users in rooms may publicly communicate with each
+		other.  Users in other rooms cannot "hear" what users in one room
+		are saying.
+
+	3. Messages - There are several different types of messages on the Talker
+		system.
+		A. Public - Public messages are messages that all users, can hear
+			or read.  These messages are not specifically directed at
+			any particular user.  There are two types of Public
+			messages:
+			i. Online - Online public messages take the form of .say
+				.emote.  Users online (in the same room) are able
+				to read these messages.  Users who sign onto the
+				system later are not able to retrieve this set of
+				messages.
+			ii. Offline - Offline public messages are messages left
+				on message boards, using .write.  These messages
+				are stored in the database in the messages table.
+				The message boards are linked to the areas via
+				the messarea table.  If a user writes a message
+				on the board, it remains there until someone
+				deletes it.  Therefore, if a user logs onto the
+				system several hours after a message was left, it
+				should still be available to them.
+		B. Private
+			i. Online - Online private messages take the form of the
+				.tell and .remote commands.  These commands take
+				the recipient's name as a parameter.  The user's
+				name is then checked to get the index of the
+				user object.  When the index is retrieved, the
+				message is written directly to that socket, so
+				that private messages are sent directly to the
+				intended recipient.
+			ii. Offline - Offline private messages are messages that
+				get stored in the mail table (not implemented
+				yet).  This mail table will be linked to the user
+				object by a link table, usermail.  An offline
+				private message will be stored until the user
+				deletes it.
+
+2. Using the data model, design a database that would contain this data.
+
+	I have been designing the database as I go along.  This is because I have
+	some rough ideas about how I want to implement things, and when ideas about
+	how to make things better pop up, I don't want to be too locked into a
+	single design.  I should have the database finalized once I am finished
+	implementing the mail systems.
+
+3. Interview users and perform analysis on the existing features to find out user
+	requirements.
+
+	Prior to the project's inception, I created a command on the original
+	Dark Ages Talker that will list the number of times a command had been
+	executed.  Using that list, I created the Command Analysis report that
+	is available on the Project Weblog.  Getting the most often used commands
+	along with the essential commands for meeting the messaging criteria
+	listed in the Messages section of #1, I have decided which commands to 
+	implement.  Talking to many of the users, I wasn't provided with many
+	new suggestions of the command nature.  There were a few cosmetic changes
+	suggested, but they were mostly beyond the scope of the project and are
+	not going to be included.
+
+4. Design user requirements and features to work with both main interfaces.
+
+	I have created another report on the Project Weblog that discusses the
+	commands that I intend to implement on the Talker System that are 
+	available on both interfaces.
+
+5. Implement a database according to database design above.
+
+	Because I have not finalized the database, I have this stage about half
+	implemented.  Parts of the system that I am presently working on have
+	been implemented, while others have not.
+
+6. Implement multiuser socket server system.
+
+	I have created a Multiuser Socket Server System, called the Talker Server
+	which is available at telnet://jkb.tdf.ca:2122.  The Talker Server has a
+	main thread, which creates the Area and User arrays.  The Server stays in
+	a loop retrieving connections and passing them into UserConnection 
+	objects.  The UserConnection objects are multithreaded objects that read
+	and write to and from the socket.  When communication is detected from 
+	input buffers on the Socket, it is parsed to determine what type of 
+	message it is and processes it accordingly.  The UserConnections talk to
+	the main thread by a link to the connection array.  Finally, there is a
+	class, TalkerTimer, which is a thread that sleeps for one minute, and 
+	increments integers in the UserConnection objects to designate their 
+	online time.  This is used to test to see if connections are idle and if
+	they should be assumed logged out and disconnected.
+
+7. Create a basic socket system client.
+
+	I was able to create a socket system client in the form of a Java Swing
+	applet.  This applet, called a Chatlet, is stored at
+	http://jkb.tdf.ca/chatlet.  This applet uses a special JScrollPane called
+	a JkbScrollPane.  When a message is read from the socket, it is appended
+	to the end of the JkbScrollPane's text area.  Next, the JkbScrollPane's
+	vertical scrollbar is maximized so the user can see what the last message 
+	to be printed was.  The Chatlet has a socket connection to the Talker
+	Server.
+
+8. Connect the socket server to the database and store connection specific data 
+	in tables.
+
+	The database being used is MySQL.  I have utilized an open source MySQL
+	Java library called Connector/J, which was developed by the MySQL group.
+	After implementing some of the database tables in the MySQL database, I
+	set the Talker Server to connect to the database to authenticate users,
+	pull user information, room information and message board contents.  As
+	I continue to implement Talker Server features, I will populate the 
+	Talker Server with additional information.
+
+9. Use the database to control message attributes.
+
+	Professor Sonderegger and I decided that it would make more sense to have
+	the Talker Server control the message attributes, rather than create many
+	costly database accesses for every single message on the system.
+
+10. Create ?handling? system to process input and determine whether it is a
+	command or message and produce the correct response for the system.
+
+	This is controlled by a switch in the UserConnection object.  When input
+	is detected, it is parsed for commands.  If no commands are found, it is
+	assumed to be a public message and sent in that form.
+
+11. Implement a web-based client in Java or PHP that uses the database.
+
+	A PHP interface would be acceptable for a system that solely uses the
+	database for messages.  Since we decided not to take that path, I have
+	implemented the Chatlet, which is web based.
+
+12. Refine each interface and implement additional user features.
+
+	Once I have the basic functionality down, I will begin refinement of the
+	interfaces and implementation of additional features to the system.
+
+13. Create web-based documentation with Javadoc.
+
+	When I have finalized the commands and functions that I need for the 
+	Talker Server, I will review the system and begin to document it.
+
+14. Create more formal documentation and directions.
+
+	I have learned how to set up the Talker Server to be executed via the
+	scheduler.  Additionally, I tested the Chatlet on different browsers
+	and OSes.  I will document this type of installation information and
+	better document the user commands.  I will also document the system
+	using UML.
+
+15. If time, see if we can implement some means of encrypting communications or
+	implementing a client using .NET.
+
+	I am not sure if I will have time for this, but we'll see.
+
+
+Next, I will quickly review the Final Project and Deliverables statement and
+provide some feedback on where I stand with some of the deliverables.
+
+- At the end of this project, I would like to have a workable talker server.
+
+	At this point in time, the Talker Server is running successfully and
+	stabily.
+
+- The server will certainly run on Linux and Windows 2000.
+
+	I have not yet tested the Server System on Windows 2000.  This is mostly
+	because I have not yet installed MySQL on Windows 2000.  I have read the
+	MySQL documentation and have discovered that this is not a difficult task
+	but I plan on attempting a Windows 2000 run within the next week.
+
+- The talker server will communicate with a database.
+
+	The Talker Server will communicate with a Database.  I have not yet run
+	the system on Windows 2000, so I don't know how that will work at this
+	point in time.
+
+- I have yet to discover whether or not the system will communicate with a
+	database running on Windows 2000.
+
+	This is the issue I have just discussed.
+
+- I would like to have produced in Java or PHP a more user friendly web interface
+	that will allow users inexperienced with talkers to participate.
+
+	When the Chatlet is complete, it will be the friendly web interface.
+
+- I would like to create a talker client in Java for users that would like to run
+	one.
+
+	I have created a very basic Talker client that will provide the same 
+	functions as a direct Telnet connection.  If time, I will refine this
+	interface as well.
+
+- I would also like to take a look at creating a talker client using C# .NET.
+
+	This feature will be determined by the amount of time left over once I
+	have started the documentation process.
+
+- Finally, I would like to evaluate how I could integrate security measures, like
+	encryption to the system and if time, implement them.
+
+	This feature will also be determined by the amount of time left over once
+	I have started the documentation process.  If I don't get to implement 
+	any, I will at least attempt to get some kind of idea of what I would try
+	to do to accomplish this.  Possibly sending of an encryption key from the
+	client to the server and encrypting the communication back and forth.
+
+- Along with the system, I would like to produce documentation of the source code
+itself, along with user and administration directions on the applications
+developed in the project along with the use of the talker itself.
+
+	Again, once I have finalized the system, I can begin this stage.
+
+- In addition to the documentation and actual program, I will submit a report that
+evaluates the design choices that I faced and ultimately decided upon.
+
+	I have created the initial design choice analysis that is up on the
+	weblog.  That report's information will be included.  Additional choices,
+	like the decisions to make some things part of the database and others
+	part of the user object will be covered, too.
+
+- The report will also discuss some of the knowledge I have gained through the
+project and future recommendations if ever had to implement this project again.
+
+	I will need to think on this one when I have gotten the project mostly
+	implemented.
+
+- Finally, I will attempt to model the system using UML or another formal
+description language.
+
+	I will need to review UML and how to model things using this language.
+
+	
+Finally, I will like to review the next steps of the project and what I plan on
+doing next.
+
+1. Implement the .write command to let users write messages on the boards.
+	Also implement .wipe to erase the board.
+2. Design the database table for Mail and Mailbox and Implement the .rmail,
+	.smail and .dmail commands.
+3. Add the system date and time reporting into the Talker Server.  Then, I
+	can have the date and time written to stdout, which is captured as
+	a log file.  This will help me track when Exceptions have occurred.
+4. Create a means for new users to connect to the system and become active
+	users.  At present, if you don't already have an account, you can not
+	connect.
+5. Create a means for Chatlet users to authenticate to the Talker Server. This
+	is probably best accomplished by opening a window prompting for a user
+	password combination.  The input is sent to the Talker and parsed for
+	the "bad password" line, and if it is received, it prompts again.  At
+	present, Chatlet users send the username and password for a pre-setup
+	user called Webman.
+6. Improve the way input is parsed for commands.  Possibly create a function
+	called parse that does the parsing and calls the actual method.  This
+	must also take into account shortcuts, for instance .q instead of .quit.
+	Of course, if there are two commands that start with the same letters,
+	the one appearing first will be executed in the case of shortcuts.
+7. Implement the .tell and .remote commands for sending online private messages.
+8. Document how to create the startup script for the Talker Server using the at
+	daemon.
+9. Install MySQL on Windows 2000 and Talker Server on Windows 2000 and see if the
+	system works.  Document the results.
+10. Create a report of which browsers with with Java versions work with Chatlet.
+11. Implement .afk
+12. Implement a review buffer.  Implement .rev and .cbuff
+13. Implement .help command (online documentation later)
+14. Implement .examine and .look to provide more information about an area or a
+	particular user.
+15. Implement .idle to produce a list of how long connections have been idle.
+16. Implement .topic to change the topics in rooms.
+17. Figure out a more stable means of running the Areas.
+
+
+
+
+
+

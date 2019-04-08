@@ -1,0 +1,218 @@
+Command Analysis
+CS690 Project: Modernizing the Dark Ages Talker
+Jeffrey K. Brown
+6/22/03
+
+This report runs down the most important commands on the Dark Ages Talker
+that will be implemented.  Additionally, the Command Report will be taken
+into account, as I will implement some of the most popular commands, too.
+For the examples of the command's output, I will use two example names,
+Summoner and Penguin.
+
+
+
+Public Communication Commands:
+
+.say
+	The .say command is the most often used command.  On the command report,
+it is not listed, because it is the default command.  It is used to communicate
+with all users in the same room as the user with something to say.
+
+	Called using:  .say Hello Everyone
+	Summoner sees: You say: Hello Everyone
+	Everyone sees: Summoner says: Hello Everyone
+
+.emote
+	The .emote command is used to show emotion that humans in the real world
+would ordinarily communicate nonverbally with expressions.  Evolution of the talker
+has made it used to show action as well.
+
+	Called Using: .emote smiles at everyone
+	Summoner sees: Summoner smiles at everyone
+	Everyone sees: Summoner smiles at everyone
+
+.afk
+	The .afk command is short for "Away from Keyboard".  When this command
+is called, a message is displayed to the users in the room informing them of
+the user's intent to go away from the keyboard.  Additionally, all private
+communication to the user is returned with a message to the sender informing
+them that the user is away from the keyboard.  The .afk command takes a parameter
+that informs the rest of the room of any additional information about where the
+user may be going.
+
+	Called using:  .afk feeding the dog
+	Summoner sees:  You go .afk, feeding the dog
+	Everyone sees:  Summoner goes .afk, feeding the dog
+
+.review
+	.review is used to review the last 20 lines of public conversation that took place
+in a room.  If a conversation is going on and someone missed an important point, they
+may call this .review command and get that point again.
+
+	Called using:  .rev
+	Summoner sees:  Penguin says: Java is fun
+	                Summoner says: Yes, I agree
+			Penguin nods.
+
+.cbuff
+	Suppose someone was discussing a controversial topic and do not want anyone coming
+into the room later and doing a .review command and reviewing the conversation.  The command,
+.cbuff will allow a paranoid user to clear the public conversation buffer, and protect the
+messages from those who have not already seen it.
+
+	Called using:  .cbuff
+	Summoner sees:  Conversation buffer cleared.
+
+
+
+Offline Public Communication Commands:
+
+.write
+	Each room has a message board in it.  If a user wanted to post a message that
+all users who enter the room may read, the user would use the .write command.  The
+.write command takes the message to be displayed as a parameter.
+
+	Called using:  .write Today is Penguin's birthday
+	Summoner sees:  You write the message on the board.
+	Everyone sees:  Summoner writes a message on the board.
+
+.read
+	To read messages on the board, one would use the .read command.
+
+	Called using:  .read
+	Summoner sees:  From Summoner (Jun 22, 2003: 12:45):  Today is Penguin's birthday
+	Everyone sees:  Summoner reads the message board.
+
+.wipe
+	If a message board in a room gets cluttered with too many messages, an enabled
+user may wipe the message board using the .wipe command.  The .wipe command takes one
+parameter, either all or a number.  If the parameter is all, all of the messages are
+deleted.  If the parameter is a number, the line number of the message is deleted.
+
+	Called using:  .wipe all
+	Summoner sees:  You wipe all messages from the board.
+	Everyone sees:  Summoner wipes all messages from the board.
+
+
+
+Private Communication Commands:
+
+.tell
+	The .tell command is the private equivalent of .say.  Private commands require
+an additional parameter saying to whom the message is sent.  These private messages
+are invisible to other users on the talker.
+
+	Called using:  .tell penguin Hi Penguin
+	Summoner sees:  You tell Penguin: Hi Penguin
+	Penguin sees: -> Summoner tells you: Hi Penguin
+	Everyone sees:
+
+.remote
+
+	Like the .tell command, .remote is the private equivalent of .emote.  This
+command sends an .emote privately.
+
+	Called using:  .remote penguin gives a high five
+	Summoner sees:  -> You emote to Penguin: Summoner gives a high five
+	Penguin sees:  -> Summoner gives a high five
+	Everyone sees:
+
+
+
+Offline Private Communication Commands:
+
+.smail
+	The .smail command is short for "send mail".  This command stores a message in
+the mailbox of individual users, allowing for communication or sending of a message to a
+user whether they are logged on or not.  Because it is private, users in the room do not
+see anything either.
+
+	Called by:  .smail penguin Hello Penguin Friend
+	Summoner sees:  Your mail is delivered to Penguin
+	Penguin sees by .rmail:  From Summoner (date and time):  Hello Penguin Friend
+
+.rmail
+	The .rmail command is short for "read mail".  This command lists all the messages
+stored in a user's mailbox.
+
+	Called by:  .rmail
+	Summoner sees:  From Penguin (Jun 06 2002; 12:39): What's new buddy?
+	                From Penguin (Jun 14 2002; 15:02): Nice Joke...
+
+.dmail
+	Mail is deleted using the .dmail command.  Dmail takes one argument.
+Depending on whether the argument is all or a number, the .dmail command
+deletes either all of the mail, or the specific line number of the mail listing.
+
+	Called by:  .dmail all
+	Summoner sees:  All mail deleted.
+
+
+
+World Commands
+
+.help
+	The command, .help, is used to display the online help documentation.
+
+	Called by:  .help
+	Summoner sees the help file
+
+.quit
+	The .quit command is used to disconnect the user from the system safely,
+saving settings and displaying a message to inform the other users that the
+quitting user has left.
+
+	Called by:  .quit
+	Summoner sees:  You leave the realm of Dark Ages, Goodbye!
+	Everyone sees:  Leaving Us:  Summoner
+
+.examine
+	.Examine is used by a user to check another user's or one's own settings,
+profile or user information.
+
+	Called by:  .examine pengin
+	Summoner sees Penguin's user information and profile.
+
+.who
+	The .who command displays a list of users currently signed on the system.
+This list includes user's name, short description, their current room, their level,
+and the elapsed time logged on.
+
+	Called by:  .who
+	Summoner sees the list of users logged onto the system.
+
+.look
+	The .look command displays information about the room, including the topic,
+the number of messages on the message board, the users in the current room, and the
+description of the room.
+
+	Called by:  .look
+	Summoner sees the room description, users in the room, number of messages
+	on the board and the users in the room.
+
+.idle
+	The .idle command displays the idle time of users on the system.
+This gives the user an indication of whether or not a user is paying attention
+or not.
+
+	Called by:  .idle
+	Summoner sees the list of users on the system along with their idle time.
+
+.topic
+	The .topic command allows a user to specify or change the topic of
+conversation in a room.
+
+	Called by:  .topic Socket Programming
+	Summoner sees:  You have changed the topic to "Socket Programming"
+	Everyone sees:  Summoner changed the topic to "Socket Programming"
+
+.go
+	The .go command is used to change from one room of the talker to another.
+When a user changes rooms, users in the starting room see a message notifying them
+that the user has left, and the users in the fininshing room see a message
+notifying them that the user has arrived.
+
+	Called by:  .go Penguin
+	Summoner sees the description of the Penguin room
+	Penguin sees: Summoner enters the room
+	Everyone sees:  Summoner leaves the room.
